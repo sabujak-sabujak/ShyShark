@@ -18,7 +18,7 @@ class SimpleAdapter : RecyclerView.Adapter<SimpleAdapter.ViewHolder>() {
         )
     }
 
-    override fun getItemCount() = 5
+    override fun getItemCount() = 10
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.setData(position)
