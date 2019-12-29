@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ShySharkView">
+        <attr name="restoreScaleAnimationDuration" format="integer" />
+        <attr name="autoDraggingAnimationDuration" format="integer" />
+        <attr name="defaultElevation" format="dimension" />
+        <attr name="dragThrashold" format="float" />
+        <attr name="scaleGap" format="float" />
+        <attr name="preloadCount" format="integer" />
+        <attr name="swipeableFlag">
+            <flag name="swipe_none" value="0" />
+            <flag name="swipe_all" value="15" />
+            <flag name="swipe_vertical" value="12" />
+            <flag name="swipe_horizontal" value="3" />
+
+            <flag name="swipe_left" value="1" />
+            <flag name="swipe_right" value="2" />
+            <flag name="swipe_top" value="4" />
+            <flag name="swipe_bottom" value="8" />
+        </attr>
+    </declare-styleable>
+</resources>
