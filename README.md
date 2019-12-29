@@ -16,7 +16,50 @@ I tried to implement it simply. You can easily fix this.
 
 ### Gradle
 
-Preparing
+```groovy
+    dependencies {
+        implementation 'life.sabujak:shyshark:0.0.1'
+    }
+```
+### Usage
+```xml
+            <life.sabujak.shyshark.ShySharkView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginBottom="16dp"
+                app:autoDraggingAnimationDuration="200"
+                app:dragThrashold="0.1"
+                app:layout_constraintBottom_toTopOf="@+id/fab_main_good"
+                app:layout_constraintTop_toTopOf="parent"
+                app:restoreScaleAnimationDuration="200"
+                app:scaleGap="0.5"
+                app:swipeableFlag="swipe_horizontal" />
+```
+
+```kotlin
+                    recyclerView.setOnSwipeListener(object :
+                        OnSwipeListener {
+                        override fun swiped(direction: Int) {
+                            when (direction) {
+                                SWIPE_LEFT -> {
+                                }
+                                SWIPE_RIGHT -> {
+                                }
+                                SWIPE_TOP -> {
+                                }
+                                SWIPE_BOTTOM -> {
+                                }
+                            }
+                        }
+            
+                        override fun changeHorizontalDrag(direction: Int, percent: Float) {
+                        }
+            
+                        override fun changeVerticalDrag(direction: Int, percent: Float) {
+                        }
+                    })
+```
 
 #### attribute
 
