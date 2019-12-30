@@ -1,9 +1,7 @@
 package life.sabujak.shyshark.listener
 
-import android.view.View
-
 interface OnSwipeListener {
-    fun swiped(direction: Int)
-    fun changeHorizontalDrag(direction: Int, percent: Float)
-    fun changeVerticalDrag(direction: Int, percent: Float)
+    fun onSwiped(position: Int, direction: Int)
+    fun onChangeHorizontalDrag(direction: Int, percent: Float)
+    fun onChangeVerticalDrag(direction: Int, percent: Float)
 }

@@ -30,28 +30,28 @@ class MainActivity : AppCompatActivity() {
         )
         recyclerView.setOnSwipeListener(object :
             OnSwipeListener {
-            override fun swiped(direction: Int) {
+            override fun onSwiped(position: Int, direction: Int) {
                 when (direction) {
                     SWIPE_LEFT -> {
-                        println("swiped LEFT!!")
+                        println("swiped LEFT!! $position")
                     }
                     SWIPE_RIGHT -> {
-                        println("swiped RIGHT")
+                        println("swiped RIGHT $position")
                     }
                     SWIPE_TOP -> {
-                        println("swiped TOP")
+                        println("swiped TOP $position")
                     }
                     SWIPE_BOTTOM -> {
-                        println("swiped BOTTOM")
+                        println("swiped BOTTOM $position")
                     }
                 }
             }
 
-            override fun changeHorizontalDrag(direction: Int, percent: Float) {
+            override fun onChangeHorizontalDrag(direction: Int, percent: Float) {
                 println("changeHorizontalDrag $direction $percent")
             }
 
-            override fun changeVerticalDrag(direction: Int, percent: Float) {
+            override fun onChangeVerticalDrag(direction: Int, percent: Float) {
                 println("changeVerticalDrag $direction $percent")
             }
         })

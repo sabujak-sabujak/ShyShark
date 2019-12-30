@@ -9,11 +9,11 @@
     <life.sabujak.shyshark.ShySharkView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginBottom="16dp"
+        android:layout_height="match_parent"
+        android:paddingBottom="88dp"
+        android:clipToPadding="false"
         app:autoDraggingAnimationDuration="200"
         app:dragThrashold="0.1"
-        app:layout_constraintBottom_toTopOf="@+id/fab_main_good"
         app:layout_constraintTop_toTopOf="parent"
         app:restoreScaleAnimationDuration="200"
         app:scaleGap="0.5"
@@ -26,10 +26,10 @@
         android:layout_height="56dp"
         android:layout_margin="16dp"
         android:layout_marginBottom="16dp"
+        app:backgroundTint="#9C27B0"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/fab_main_previous"
         app:layout_constraintHorizontal_bias="0.5"
-        app:backgroundTint="#9C27B0"
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/ic_sentiment_dissatisfied" />
 
@@ -65,9 +65,9 @@
         android:layout_height="56dp"
         android:layout_margin="16dp"
         android:layout_marginBottom="16dp"
+        app:backgroundTint="#E91E63"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:backgroundTint="#E91E63"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/fab_main_next"
         app:srcCompat="@drawable/ic_sentiment_satisfied" />

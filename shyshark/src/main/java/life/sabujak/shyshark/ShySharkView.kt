@@ -1,6 +1,7 @@
 package life.sabujak.shyshark
 
 import android.content.Context
+import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
@@ -12,83 +13,91 @@ import life.sabujak.shyshark.listener.OnInternalDragListener
 import life.sabujak.shyshark.listener.OnSwipeListener
 
 class ShySharkView(context: Context, attrs: AttributeSet?) : RecyclerView(context, attrs) {
-    private var onSwipeListener: OnSwipeListener? = null
 
-    private val internalDragListener = object :
+    private var onSwipeListener: OnSwipeListener? = null
+    private val shySharkLayoutManager: ShySharkLayoutManager
+
+    init {
+        shySharkLayoutManager = ShySharkLayoutManager(getInternalDragListener())
+            .apply {
+                context.theme?.obtainStyledAttributes(
+                    attrs,
+                    R.styleable.ShySharkView,
+                    0, 0
+                )?.let { initAttribute(this, it) }
+            }.also {
+                layoutManager = it
+            }
+    }
+
+    fun setOnSwipeListener(onSwipeListener: OnSwipeListener) {
+        this.onSwipeListener = onSwipeListener
+        shySharkLayoutManager.setOnSwipeListener(onSwipeListener)
+    }
+
+    fun nextView() {
+        shySharkLayoutManager.nextView()
+    }
+
+    fun previousView() {
+        shySharkLayoutManager.previousView()
+    }
+
+    fun performSwipe(direction: Int) {
+        shySharkLayoutManager.performSwipe(this, direction)
+    }
+
+    private fun getInternalDragListener() = object :
         OnInternalDragListener {
         override fun onDrag(v: View, x: Float, y: Float) {
-            (layoutManager as? ShySharkLayoutManager)?.run {
+            shySharkLayoutManager.run {
                 changeChildViewScale(this@ShySharkView, getChildViewHolder(v), x, y)
                 changeDragPercent(this@ShySharkView, x, y)
             }
         }
 
         override fun onDragEnded(v: View, x: Float, y: Float) {
-            (layoutManager as ShySharkLayoutManager).endDrag(
-                this@ShySharkView,
-                getChildViewHolder(v),
-                x,
-                y
-            )
+            shySharkLayoutManager.onDragEnded(this@ShySharkView, getChildViewHolder(v), x, y)
         }
     }
 
-    fun setOnSwipeListener(onSwipeListener: OnSwipeListener) {
-        this.onSwipeListener = onSwipeListener
-        (layoutManager as? ShySharkLayoutManager)?.setOnSwipeListener(onSwipeListener)
-    }
+    private fun initAttribute(
+        shySharkLayoutManager: ShySharkLayoutManager,
+        shySharkAttribute: TypedArray
+    ) {
+        shySharkLayoutManager.apply {
+            if (shySharkAttribute.hasValue(R.styleable.ShySharkView_swipeableFlag))
+                swipeableFlag = shySharkAttribute.getInteger(
+                    R.styleable.ShySharkView_swipeableFlag,
+                    SWIPE_LEFT or SWIPE_RIGHT or SWIPE_TOP or SWIPE_BOTTOM
+                )
 
-    fun nextView() {
-        (layoutManager as? ShySharkLayoutManager)?.nextView()
-    }
+            if (shySharkAttribute.hasValue(R.styleable.ShySharkView_preloadCount))
+                preloadCount =
+                    shySharkAttribute.getInteger(R.styleable.ShySharkView_preloadCount, 3)
 
-    fun previousView() {
-        (layoutManager as? ShySharkLayoutManager)?.previousView()
-    }
+            if (shySharkAttribute.hasValue(R.styleable.ShySharkView_scaleGap))
+                scaleGap = shySharkAttribute.getFloat(R.styleable.ShySharkView_scaleGap, 0.1f)
 
-    fun performSwipe(direction: Int) {
-        (layoutManager as? ShySharkLayoutManager)?.performSwipe(this, direction)
-    }
+            if (shySharkAttribute.hasValue(R.styleable.ShySharkView_dragThrashold))
+                dragThrashold =
+                    shySharkAttribute.getFloat(R.styleable.ShySharkView_dragThrashold, 0.2f)
 
-    init {
-        layoutManager = ShySharkLayoutManager(internalDragListener)
-            .apply {
-                context.theme?.obtainStyledAttributes(
-                    attrs,
-                    R.styleable.ShySharkView,
-                    0, 0
-                )?.let {
-                    if (it.hasValue(R.styleable.ShySharkView_swipeableFlag))
-                        swipeableFlag = it.getInteger(
-                            R.styleable.ShySharkView_swipeableFlag,
-                            SWIPE_LEFT or SWIPE_RIGHT or SWIPE_TOP or SWIPE_BOTTOM
-                        )
+            if (shySharkAttribute.hasValue(R.styleable.ShySharkView_defaultElevation))
+                defaultElevation =
+                    shySharkAttribute.getDimension(R.styleable.ShySharkView_defaultElevation, 0f)
 
-                    if (it.hasValue(R.styleable.ShySharkView_preloadCount))
-                        preloadCount = it.getInteger(R.styleable.ShySharkView_preloadCount, 3)
+            if (shySharkAttribute.hasValue(R.styleable.ShySharkView_restoreScaleAnimationDuration))
+                restoreScaleAnimationDuration = shySharkAttribute.getInteger(
+                    R.styleable.ShySharkView_restoreScaleAnimationDuration,
+                    200
+                ).toLong()
 
-                    if (it.hasValue(R.styleable.ShySharkView_scaleGap))
-                        scaleGap = it.getFloat(R.styleable.ShySharkView_scaleGap, 0.1f)
-
-                    if (it.hasValue(R.styleable.ShySharkView_dragThrashold))
-                        dragThrashold = it.getFloat(R.styleable.ShySharkView_dragThrashold, 0.4f)
-
-                    if (it.hasValue(R.styleable.ShySharkView_defaultElevation))
-                        defaultElevation =
-                            it.getDimension(R.styleable.ShySharkView_defaultElevation, 0f)
-
-                    if (it.hasValue(R.styleable.ShySharkView_restoreScaleAnimationDuration))
-                        restoreScaleAnimationDuration = it.getInteger(
-                            R.styleable.ShySharkView_restoreScaleAnimationDuration,
-                            200
-                        ).toLong()
-
-                    if (it.hasValue(R.styleable.ShySharkView_autoDraggingAnimationDuration))
-                        autoDraggingAnimationDuration = it.getInteger(
-                            R.styleable.ShySharkView_autoDraggingAnimationDuration,
-                            200
-                        ).toLong()
-                }
-            }
+            if (shySharkAttribute.hasValue(R.styleable.ShySharkView_autoDraggingAnimationDuration))
+                autoDraggingAnimationDuration = shySharkAttribute.getInteger(
+                    R.styleable.ShySharkView_autoDraggingAnimationDuration,
+                    200
+                ).toLong()
+        }
     }
 }
