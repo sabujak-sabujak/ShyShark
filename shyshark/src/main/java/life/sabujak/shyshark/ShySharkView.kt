@@ -57,7 +57,7 @@ class ShySharkView(context: Context, attrs: AttributeSet?) : RecyclerView(contex
         }
 
         override fun onDragEnded(v: View, x: Float, y: Float) {
-            shySharkLayoutManager.endDrag(this@ShySharkView, getChildViewHolder(v), x, y)
+            shySharkLayoutManager.onDragEnded(this@ShySharkView, getChildViewHolder(v), x, y)
         }
     }
 
@@ -81,7 +81,7 @@ class ShySharkView(context: Context, attrs: AttributeSet?) : RecyclerView(contex
 
             if (shySharkAttribute.hasValue(R.styleable.ShySharkView_dragThrashold))
                 dragThrashold =
-                    shySharkAttribute.getFloat(R.styleable.ShySharkView_dragThrashold, 0.4f)
+                    shySharkAttribute.getFloat(R.styleable.ShySharkView_dragThrashold, 0.2f)
 
             if (shySharkAttribute.hasValue(R.styleable.ShySharkView_defaultElevation))
                 defaultElevation =
