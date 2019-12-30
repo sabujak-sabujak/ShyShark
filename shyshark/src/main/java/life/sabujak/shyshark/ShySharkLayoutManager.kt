@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import life.sabujak.shyshark.listener.OnInternalDragListener
 import life.sabujak.shyshark.listener.OnSwipeListener
 import kotlin.math.abs
+import kotlin.math.sqrt
 
 
 class ShySharkLayoutManager(private val internalDragListener: OnInternalDragListener) :
@@ -43,54 +44,27 @@ class ShySharkLayoutManager(private val internalDragListener: OnInternalDragList
 
     override fun onLayoutChildren(recycler: RecyclerView.Recycler, state: RecyclerView.State) {
         detachAndScrapAttachedViews(recycler)
-        val itemCount = itemCount
-        if (itemCount < 1) {
-            return
-        }
+        if (itemCount < 1) return
 
         val startPosition = (itemCount - 1).coerceAtMost(topPosition + preloadCount - 1)
 
         for (position in startPosition downTo topPosition) {
+            val isTopView = position == topPosition
             val drawPosition = position - topPosition
             val view = recycler.getViewForPosition(position)
 
-            defaultElevation = defaultElevation.coerceAtLeast(ViewCompat.getElevation(view))
+            changeDefaultElevation(ViewCompat.getElevation(view))
 
-            if (position == topPosition) {
-                var rawX = 0f
-                var rawY = 0f
-                view.setOnTouchListener { v, event ->
-                    when (event.action) {
-                        MotionEvent.ACTION_DOWN -> {
-                            rawX = v.x - event.rawX
-                            rawY = v.y - event.rawY
-                        }
-                        MotionEvent.ACTION_UP -> {
-                            internalDragListener.onDragEnded(
-                                v,
-                                rawX + event.rawX,
-                                rawY + event.rawY
-                            )
-                        }
-                        MotionEvent.ACTION_MOVE -> {
-                            internalDragListener.onDrag(v, rawX + event.rawX, rawY + event.rawY)
-                            transitionAnimation(
-                                v,
-                                rawX + event.rawX, rawY + event.rawY
-                            )
-                        }
-                    }
-                    true
-                }
-            }
+            if (isTopView) setTopViewOnTouchListener(view)
 
-            if (position == topPosition) {
-                ViewCompat.setElevation(view, defaultElevation)
-            } else {
-                ViewCompat.setElevation(view, defaultElevation - 1f * drawPosition)
-            }
+            setElevation(
+                view,
+                if (isTopView) defaultElevation
+                else defaultElevation - 1f * drawPosition
+            )
 
             measureChildWithMargins(view, 0, 0)
+
             val widthSpace = width - getDecoratedMeasuredWidth(view)
             val heightSpace = height - getDecoratedMeasuredHeight(view)
 
@@ -109,11 +83,38 @@ class ShySharkLayoutManager(private val internalDragListener: OnInternalDragList
             }
 
             if (startXPosition == null || startYPosition == null) {
-                startXPosition = view.x
-                startYPosition = view.y
+                initStartPosition(view.x, view.y)
             }
 
             addView(view)
+        }
+    }
+
+    /**
+     * Change the child view's scale value by dragging the parent view.
+     */
+    fun changeChildViewScale(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder,
+        dX: Float,
+        dY: Float
+    ) {
+        val swipeValue = sqrt(dX * dX + dY * dY.toDouble())
+        val fraction = 1.0.coerceAtMost(swipeValue / getThreshold(viewHolder))
+        val childCount = recyclerView.childCount
+
+        for (i in 0 until childCount) {
+            val child = recyclerView.getChildAt(i)
+            val level: Int = childCount - i - 1
+            if (level > 0) {
+                val scale = 0f.coerceAtLeast(
+                    1f.coerceAtMost((1 - scaleGap * level + fraction * scaleGap).toFloat())
+                )
+                child.scaleX = scale
+                if (level < preloadCount - 1) {
+                    child.scaleY = scale
+                }
+            }
         }
     }
 
@@ -130,42 +131,6 @@ class ShySharkLayoutManager(private val internalDragListener: OnInternalDragList
 
     fun setOnSwipeListener(onSwipeListener: OnSwipeListener) {
         this.onSwipeListener = onSwipeListener
-    }
-
-    private fun getThreshold(viewHolder: RecyclerView.ViewHolder): Float {
-        return viewHolder.itemView.width * 0.9f
-    }
-
-    /**
-     * Change the child view's scale value by dragging the parent view.
-     */
-    fun changeChildViewScale(
-        recyclerView: RecyclerView,
-        viewHolder: RecyclerView.ViewHolder,
-        dX: Float,
-        dY: Float
-    ) {
-        val swipeValue = Math.sqrt(dX * dX + dY * dY.toDouble())
-        var fraction: Double = swipeValue / getThreshold(viewHolder)
-        fraction = Math.min(1.0, fraction)
-
-        val childCount = recyclerView.childCount
-        for (i in 0 until childCount) {
-            val child = recyclerView.getChildAt(i)
-            val level: Int = childCount - i - 1
-            if (level > 0) {
-                val scale = 0f.coerceAtLeast(
-                    1f.coerceAtMost(
-                        (1 - scaleGap * level
-                                + fraction * scaleGap).toFloat()
-                    )
-                )
-                child.scaleX = scale
-                if (level < preloadCount - 1) {
-                    child.scaleY = scale
-                }
-            }
-        }
     }
 
     fun changeDragPercent(
@@ -188,7 +153,6 @@ class ShySharkLayoutManager(private val internalDragListener: OnInternalDragList
                 abs(swipeHeightPercent)
             )
         }
-
     }
 
 
@@ -198,12 +162,8 @@ class ShySharkLayoutManager(private val internalDragListener: OnInternalDragList
     ) {
         val topView = getTopView(recyclerView)
         if (isEnableDirection(direction) && topView != null) {
-            onSwiped(topView, getNextView(recyclerView), direction)
+            onSwiped(topView, getSecondView(recyclerView), direction)
         }
-    }
-
-    private fun isSwiped(swipedPercent: Float): Boolean {
-        return swipedPercent > dragThrashold
     }
 
     fun endDrag(
@@ -222,7 +182,7 @@ class ShySharkLayoutManager(private val internalDragListener: OnInternalDragList
             ?.let {
                 onSwiped(
                     viewHolder.itemView,
-                    getNextView(recyclerView),
+                    getSecondView(recyclerView),
                     it
                 )
             }
@@ -236,25 +196,68 @@ class ShySharkLayoutManager(private val internalDragListener: OnInternalDragList
             }
     }
 
+    private fun initStartPosition(x: Float, y: Float) {
+        startXPosition = x
+        startYPosition = y
+    }
+
+    private fun changeDefaultElevation(elevation: Float) {
+        defaultElevation = defaultElevation.coerceAtLeast(elevation)
+    }
+
+    private fun setElevation(view: View, elevation: Float) {
+        ViewCompat.setElevation(view, elevation)
+    }
+
+    private fun setTopViewOnTouchListener(topView: View) {
+        var rawX = 0f
+        var rawY = 0f
+        topView.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    rawX = v.x - event.rawX
+                    rawY = v.y - event.rawY
+                }
+                MotionEvent.ACTION_UP -> {
+                    internalDragListener.onDragEnded(
+                        v,
+                        rawX + event.rawX,
+                        rawY + event.rawY
+                    )
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    internalDragListener.onDrag(v, rawX + event.rawX, rawY + event.rawY)
+                    transitionAnimation(
+                        v,
+                        rawX + event.rawX, rawY + event.rawY
+                    )
+                }
+            }
+            true
+        }
+    }
+
+    private fun isSwiped(swipedPercent: Float): Boolean {
+        return swipedPercent > dragThrashold
+    }
+
+    private fun getThreshold(viewHolder: RecyclerView.ViewHolder): Float {
+        return viewHolder.itemView.width * 0.9f
+    }
+
     private fun judgeTopOrBottom(percent: Float): Int =
         if (percent > 0) SWIPE_BOTTOM
         else SWIPE_TOP
 
-
-    private fun judgeLeftOrRight(percent: Float): Int {
-        return if (percent > 0) {
-            SWIPE_RIGHT
-        } else {
-            SWIPE_LEFT
-        }
-    }
+    private fun judgeLeftOrRight(percent: Float): Int =
+        if (percent > 0) SWIPE_RIGHT
+        else SWIPE_LEFT
 
     private fun onSwiped(
         swipedView: View,
-        nextView: View?,
+        secondView: View?,
         direction: Int
     ) {
-
         fun swipedAnimation(x: Float, y: Float) {
             transitionAnimation(swipedView, x, y, autoDraggingAnimationDuration) {
                 clearView(swipedView)
@@ -280,8 +283,8 @@ class ShySharkLayoutManager(private val internalDragListener: OnInternalDragList
             }
         }
 
-        if (nextView != null) {
-            restoreScaleAnimation(nextView, restoreScaleAnimationDuration)
+        if (secondView != null) {
+            restoreScaleAnimation(secondView, restoreScaleAnimationDuration)
         }
     }
 
@@ -317,7 +320,7 @@ class ShySharkLayoutManager(private val internalDragListener: OnInternalDragList
         view.y = startYPosition ?: 0f
     }
 
-    private fun getNextView(recyclerView: RecyclerView): View? {
+    private fun getSecondView(recyclerView: RecyclerView): View? {
         if (recyclerView.childCount < 2) return null
         return recyclerView.getChildAt(childCount - 2)
     }
@@ -343,6 +346,6 @@ class ShySharkLayoutManager(private val internalDragListener: OnInternalDragList
             .map { it.second }
     }
 
-    private fun isEnableDirection(direction: Int) = (swipeableFlag and direction) == direction
-
+    private fun isEnableDirection(direction: Int) =
+        (swipeableFlag and direction) == direction
 }
