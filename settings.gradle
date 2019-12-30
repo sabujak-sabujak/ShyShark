@@ -2,7 +2,7 @@ include ':app', ':shyshark'
 rootProject.name='ShyShark'
 
 gradle.ext.versionCode = 1
-gradle.ext.versionName = '0.0.1'
+gradle.ext.versionName = '0.0.2'
 
 gradle.ext.set('minSdk', 16)
 gradle.ext.set('targetSdk', 29)

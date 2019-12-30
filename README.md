@@ -1,10 +1,10 @@
 ![Image](/pic/shyshark_banner.png)
 # ShyShark 🦈
 ShyShark is Swipeable card stack view like Tinder.
-I tried to implement it simply. You can easily fix this.
 
-## What's New in 0.0.1? :tada:
-- [Release] Release ShyShark :tada:
+
+## What's New in 0.0.2? :tada:
+- Fix Some Bug :tada:
 
 ## Result Screen
 
@@ -18,7 +18,7 @@ I tried to implement it simply. You can easily fix this.
 
 ```groovy
     dependencies {
-        implementation 'life.sabujak:shyshark:0.0.1'
+        implementation 'life.sabujak:shyshark:0.0.2'
     }
 ```
 ### Usage
@@ -38,27 +38,17 @@ I tried to implement it simply. You can easily fix this.
 ```
 
 ```kotlin
-                    recyclerView.setOnSwipeListener(object :
-                        OnSwipeListener {
-                        override fun swiped(direction: Int) {
-                            when (direction) {
-                                SWIPE_LEFT -> {
-                                }
-                                SWIPE_RIGHT -> {
-                                }
-                                SWIPE_TOP -> {
-                                }
-                                SWIPE_BOTTOM -> {
-                                }
-                            }
-                        }
-            
-                        override fun changeHorizontalDrag(direction: Int, percent: Float) {
-                        }
-            
-                        override fun changeVerticalDrag(direction: Int, percent: Float) {
-                        }
-                    })
+        recyclerView.setOnSwipeListener(object :
+            OnSwipeListener {
+            override fun onSwiped(position: Int, direction: Int) {
+            }
+
+            override fun onChangeHorizontalDrag(direction: Int, percent: Float) {
+            }
+
+            override fun onChangeVerticalDrag(direction: Int, percent: Float) {
+            }
+        })
 ```
 
 #### attribute
@@ -68,7 +58,7 @@ I tried to implement it simply. You can easily fix this.
 |       swipeableFlag        | Swipeable direction                       | LEFT, RIGHT, TOP, BOTTOM |
 |        preloadCount        | Preloaded item count                      |             3            |
 |          scaleGap          | Scale gap per item                        |            0.1f          |
-|        dragThrashold       | Trashold value passed by drag             |            0.4f          |
+|        dragThrashold       | Trashold value passed by drag             |            0.2f          |
 |       defaultElevation     | z-axis value                              |             0f           |
 |     restoreScaleAnimationDuration    | Card restore animation duration |            200L          |
 |     autoDraggingAnimationDuration    | Animation duration automatically dragged |   200L          |
