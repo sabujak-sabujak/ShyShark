@@ -55,7 +55,7 @@ class ShySharkLayoutManager(private val internalDragListener: OnInternalDragList
 
             changeDefaultElevation(ViewCompat.getElevation(view))
 
-            if (isTopView) setTopViewOnTouchListener(view)
+            if (isTopView) view.postDelayed({ setTopViewOnTouchListener(view) }, 100)
 
             setElevation(
                 view,
@@ -237,10 +237,7 @@ class ShySharkLayoutManager(private val internalDragListener: OnInternalDragList
                 }
                 MotionEvent.ACTION_MOVE -> {
                     internalDragListener.onDrag(v, rawX + event.rawX, rawY + event.rawY)
-                    transitionAnimation(
-                        v,
-                        rawX + event.rawX, rawY + event.rawY
-                    )
+                    transitionAnimation(v, rawX + event.rawX, rawY + event.rawY)
                 }
             }
             true
@@ -282,23 +279,22 @@ class ShySharkLayoutManager(private val internalDragListener: OnInternalDragList
             restoreScaleAnimation(secondView, autoDraggingAnimationDuration)
         }
 
+        val value = 3f
+        
         when (direction) {
             SWIPE_TOP -> {
-                swipedAnimation(swipedView.x, swipedView.y - swipedView.height)
+                swipedAnimation(swipedView.x * value, swipedView.y - swipedView.height)
             }
             SWIPE_BOTTOM -> {
-                swipedAnimation(swipedView.x, swipedView.y + swipedView.height)
+                swipedAnimation(swipedView.x * value, swipedView.y + swipedView.height)
             }
             SWIPE_LEFT -> {
-                swipedAnimation(swipedView.x - swipedView.width, swipedView.y)
+                swipedAnimation(swipedView.x - swipedView.width, swipedView.y * value)
             }
             SWIPE_RIGHT -> {
-                swipedAnimation(swipedView.x + swipedView.width, swipedView.y)
-
+                swipedAnimation(swipedView.x + swipedView.width, swipedView.y * value)
             }
         }
-
-
     }
 
     private fun validateScale(value: Float): Float {
