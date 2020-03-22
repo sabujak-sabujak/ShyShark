@@ -3,8 +3,8 @@
 ShyShark is Swipeable card stack view like Tinder.
 
 
-## What's New in 0.0.2? :tada:
-- Fix Some Bug :tada:
+## What's New in 0.0.3? :tada:
+- Fix card swipe animation to match swiping direction([#4](https://github.com/sabujak-sabujak/ShyShark/issues/4))
 
 ## Result Screen
 
@@ -18,7 +18,7 @@ ShyShark is Swipeable card stack view like Tinder.
 
 ```groovy
     dependencies {
-        implementation 'life.sabujak:shyshark:0.0.2'
+        implementation 'life.sabujak:shyshark:0.0.3'
     }
 ```
 ### Usage
